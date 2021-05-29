@@ -1,8 +1,8 @@
 [package]
-name = "build-timestamp"
-version = "0.1.0"
 authors = ["AlephAlpha <alephalpha911@gmail.com>"]
 edition = "2018"
+name = "build-timestamp"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,6 +11,7 @@ proc-macro = true
 
 [dependencies]
 chrono = "0.4"
+once_cell = "1.7"
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = "1.0"
