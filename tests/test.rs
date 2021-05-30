@@ -23,3 +23,15 @@ fn local_utc_match() {
 
     assert_eq!(utc, local);
 }
+
+#[test]
+fn strftime_format() {
+    let utc_rfc3339 = build_timestamp_utc!();
+    let local_rfc3339 = build_timestamp_local!();
+
+    let utc_formatted = build_timestamp_utc!("%Y-%m-%dT%H:%M:%S%.f%:z");
+    let local_formatted = build_timestamp_local!("%Y-%m-%dT%H:%M:%S%.f%:z");
+
+    assert_eq!(utc_rfc3339, utc_formatted);
+    assert_eq!(local_rfc3339, local_formatted);
+}
