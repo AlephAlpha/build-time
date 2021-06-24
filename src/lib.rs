@@ -91,7 +91,7 @@ pub fn build_time_utc(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn build_time_local(input: TokenStream) -> TokenStream {
-    let local_time: DateTime<Local> = BUILD_TIME.clone().into();
+    let local_time = BUILD_TIME.with_timezone(&Local);
     let time_str = if input.is_empty() {
         local_time.to_rfc3339()
     } else {
