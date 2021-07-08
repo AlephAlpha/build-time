@@ -3,12 +3,12 @@ authors = ["AlephAlpha <alephalpha911@gmail.com>"]
 categories = ["date-and-time", "development-tools", "rust-patterns"]
 description = "Simple proc-macros to generate build timestamp string literals."
 edition = "2018"
-homepage = "https://github.com/AlephAlpha/build-timestamp"
+homepage = "https://github.com/AlephAlpha/build-time"
 keywords = ["build", "proc_macro", "timestamp", "tool"]
 license = "MIT"
 name = "build-time"
 readme = "README.md"
-repository = "https://github.com/AlephAlpha/build-timestamp"
+repository = "https://github.com/AlephAlpha/build-time"
 version = "0.1.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
