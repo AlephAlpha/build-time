@@ -37,9 +37,9 @@ use std::env;
 use syn::{parse_macro_input, LitStr};
 
 static BUILD_TIME: Lazy<DateTime<Utc>> = Lazy::new(|| match env::var("SOURCE_DATE_EPOCH") {
-        Ok(val) => { Utc.timestamp_opt(val.parse::<i64>().unwrap(), 0).unwrap() }
-        Err(_) => Utc::now(),
-    });
+    Ok(val) => Utc.timestamp_opt(val.parse::<i64>().unwrap(), 0).unwrap(),
+    Err(_) => Utc::now(),
+});
 
 /// Build time in UTC.
 ///
