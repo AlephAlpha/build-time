@@ -3,6 +3,7 @@ authors = ["AlephAlpha <alephalpha911@gmail.com>"]
 categories = ["date-and-time", "development-tools", "rust-patterns"]
 description = "Simple proc-macros to generate build timestamp string literals."
 edition = "2018"
+rust-version = "1.85"
 homepage = "https://github.com/AlephAlpha/build-time"
 keywords = ["build", "proc_macro", "timestamp", "tool"]
 license = "MIT"
@@ -17,7 +18,7 @@ version = "0.1.3"
 proc-macro = true
 
 [dependencies]
-chrono = { version = "0.4.20", default-features = false, features = ["clock"] }
+jiff = "1.0.2"
 once_cell = "1.17"
 proc-macro2 = "1.0"
 quote = "1.0"

@@ -7,13 +7,13 @@ Based on Jasen Borisov's [build_timestamp](https://crates.io/crates/build_timest
 
 Two function like procedures are provided: `build_time_utc` and `build_time_local`.
 
-They take an optional [`strftime`](https://docs.rs/chrono/0.4/chrono/format/strftime/index.html)
+They take an optional [Jiff `strftime`](https://docs.rs/jiff/1.0/jiff/fmt/strtime/index.html)
 date and time format string as input, and return a string literal.
 If the input is empty, they will return a string literal in
 [RFC 3339 date and time format](https://en.wikipedia.org/wiki/ISO_8601#RFCs),
 e.g., `"2021-05-29T06:55:50.418437046+00:00"`.
 
-Requires Rust 1.45+ because these macros are used in expression positions.
+Requires Rust 1.85+.
 
 ## Usage
 
@@ -28,7 +28,7 @@ let local_build_time = build_time_local!("%Y-%m-%dT%H:%M:%S%.f%:z");
 ```
 */
 
-use chrono::{DateTime, Local, TimeZone, Utc};
+use jiff::{tz::TimeZone, Timestamp};
 use once_cell::sync::Lazy;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
@@ -36,18 +36,45 @@ use quote::quote;
 use std::env;
 use syn::{parse_macro_input, LitStr};
 
-static BUILD_TIME: Lazy<DateTime<Utc>> = Lazy::new(|| match env::var("SOURCE_DATE_EPOCH") {
-    Ok(val) => Utc.timestamp_opt(val.parse::<i64>().unwrap(), 0).unwrap(),
-    Err(_) => Utc::now(),
+static BUILD_TIME: Lazy<Timestamp> = Lazy::new(|| {
+    env::var("SOURCE_DATE_EPOCH").map_or_else(
+        |_| Timestamp::now(),
+        |val| {
+            let seconds = val
+                .parse::<i64>()
+                .expect("SOURCE_DATE_EPOCH must be an integer number of seconds");
+            Timestamp::from_second(seconds)
+                .expect("SOURCE_DATE_EPOCH is outside the supported timestamp range")
+        },
+    )
 });
+
+fn build_time(input: TokenStream, is_utc: bool) -> TokenStream {
+    let format = if input.is_empty() {
+        None
+    } else {
+        Some(parse_macro_input!(input as LitStr))
+    };
+    let zone = if is_utc {
+        TimeZone::UTC
+    } else {
+        TimeZone::system()
+    };
+    let time = BUILD_TIME.to_zoned_datetime(zone);
+    let time_str = format.map_or_else(
+        || BUILD_TIME.display_with_offset(time.offset()).to_string(),
+        |format| time.strftime(&format.value()).to_string(),
+    );
+    let lit = LitStr::new(&time_str, Span::call_site());
+    quote!(#lit).into()
+}
 
 /// Build time in UTC.
 ///
-/// It takes an optional [`strftime`](https://docs.rs/chrono/0.4/chrono/format/strftime/index.html)
+/// It takes an optional [Jiff `strftime`](https://docs.rs/jiff/1.0/jiff/fmt/strtime/index.html)
 /// date and time format string as input, and returns a string literal.
-/// If the input is empty, it will return a string literal in
-/// [RFC 3339 date and time format](https://en.wikipedia.org/wiki/ISO_8601#RFCs),
-/// e.g., `"2021-05-29T06:55:50.418437046+00:00"`.
+/// With no argument, it returns an RFC 3339-style timestamp, e.g.,
+/// `"2021-05-29T06:55:50.418437046+00:00"`.
 ///
 /// # Example
 ///
@@ -62,25 +89,15 @@ static BUILD_TIME: Lazy<DateTime<Utc>> = Lazy::new(|| match env::var("SOURCE_DAT
 /// ```
 #[proc_macro]
 pub fn build_time_utc(input: TokenStream) -> TokenStream {
-    let time_str = if input.is_empty() {
-        BUILD_TIME.to_rfc3339()
-    } else {
-        let format = parse_macro_input!(input as LitStr);
-        BUILD_TIME.format(&format.value()).to_string()
-    };
-
-    let lit = LitStr::new(&time_str, Span::call_site());
-
-    quote!(#lit).into()
+    build_time(input, true)
 }
 
 /// Build time in the local timescale.
 ///
-/// It takes an optional [`strftime`](https://docs.rs/chrono/0.4/chrono/format/strftime/index.html)
+/// It takes an optional [Jiff `strftime`](https://docs.rs/jiff/1.0/jiff/fmt/strtime/index.html)
 /// date and time format string as input, and returns a string literal.
-/// If the input is empty, it will return a string literal in
-/// [RFC 3339 date and time format](https://en.wikipedia.org/wiki/ISO_8601#RFCs),
-/// e.g., `"2021-05-29T06:55:50.418437046+00:00"`.
+/// With no argument, it returns an RFC 3339-style timestamp, e.g.,
+/// `"2021-05-29T06:55:50.418437046+00:00"`.
 ///
 /// # Example
 ///
@@ -95,15 +112,5 @@ pub fn build_time_utc(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn build_time_local(input: TokenStream) -> TokenStream {
-    let local_time = BUILD_TIME.with_timezone(&Local);
-    let time_str = if input.is_empty() {
-        local_time.to_rfc3339()
-    } else {
-        let format = parse_macro_input!(input as LitStr);
-        local_time.format(&format.value()).to_string()
-    };
-
-    let lit = LitStr::new(&time_str, Span::call_site());
-
-    quote!(#lit).into()
+    build_time(input, false)
 }

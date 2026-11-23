@@ -6,9 +6,9 @@ Based on Jasen Borisov's [build_timestamp](https://crates.io/crates/build_timest
 
 Two function like procedures are provided: `build_time_utc` and `build_time_local`.
 
-They take an optional [`strftime`](https://docs.rs/chrono/0.4/chrono/format/strftime/index.html) date and time format string as input, and return a string literal. If the input is empty, they will return a string literal in [RFC 3339 date and time format](https://en.wikipedia.org/wiki/ISO_8601#RFCs), e.g., `"2021-05-29T06:55:50.418437046+00:00"`.
+They take an optional [`strftime`](https://docs.rs/jiff/1.0/jiff/fmt/strtime/index.html) date and time format string as input, and return a string literal. If the input is empty, they will return a string literal in [RFC 3339 date and time format](https://en.wikipedia.org/wiki/ISO_8601#RFCs), e.g., `"2021-05-29T06:55:50.418437046+00:00"`.
 
-Requires Rust 1.45+ because these macros are used in expression positions.
+Requires Rust 1.85+.
 
 ## Usage
 

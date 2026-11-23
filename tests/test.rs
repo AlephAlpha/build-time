@@ -1,5 +1,5 @@
 use build_time::{build_time_local, build_time_utc};
-use chrono::DateTime;
+use jiff::Timestamp;
 use std::{thread::sleep, time::Duration};
 
 #[test]
@@ -18,8 +18,8 @@ fn call_twice() {
 
 #[test]
 fn local_utc_match() {
-    let utc = DateTime::parse_from_rfc3339(build_time_utc!()).unwrap();
-    let local = DateTime::parse_from_rfc3339(build_time_local!()).unwrap();
+    let utc: Timestamp = build_time_utc!().parse().unwrap();
+    let local: Timestamp = build_time_local!().parse().unwrap();
 
     assert_eq!(utc, local);
 }
